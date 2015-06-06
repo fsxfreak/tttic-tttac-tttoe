@@ -3,8 +3,8 @@
     const HEIGHT = 600;
 
     const LBOX_W = WIDTH  / 9;
-    const BBOX_W = WIDTH  / 3;
     const LBOX_H = HEIGHT / 9;
+    const BBOX_W = WIDTH  / 3;
     const BBOX_H = HEIGHT / 3;
 
     var elem = document.getElementById('draw-shapes');
@@ -33,8 +33,22 @@
 
         two.update();
     }
-
     X.prototype.on = function(on) { this.mark.opacity = +on; two.update(); }
+    X.prototype.status = function() { return this.mark.opacity === 1.0;}
+
+    function O(r, c, i) {
+        var j = Math.floor(i / 3);
+        i %= 3;
+
+        var centerX = c * BBOX_W + i * LBOX_W + LBOX_W / 2;
+        var centerY = r * BBOX_H + j * LBOX_H + LBOX_H / 2;
+        const RADIUS = HEIGHT / (9 * 2) - 3;
+
+        this.mark = two.makeCircle(centerX, centerY, RADIUS);
+        two.update();
+    }
+    O.prototype.on = X.prototype.on;
+    O.prototype.status = X.prototype.status;
 
     function Board() {
         this.mainGrid = two.makeGroup(
@@ -62,14 +76,21 @@
         two.add(this.littleGrids);
 
         this.xs = [];
+        this.os = [];
         for (var r = 0; r < 3; r++) {
             this.xs[r] = [];
+            this.os[r] = [];
             for (var c = 0; c < 3; c++) {
                 this.xs[r][c] = [];
+                this.os[r][c] = [];
                 for (var i = 0; i < 9; i++) {
                     var x = new X(r, c, i);
                     x.on(false);
                     this.xs[r][c].push(x);
+
+                    var o = new O(r, c, i);
+                    o.on(false);
+                    this.os[r][c].push(o);
                 }
             }
         }
@@ -79,12 +100,36 @@
 
     Board.prototype.mark = function(r, c, i, xon) {
         switch (xon) {
-        case 0: this.xs[r][c][i].on(true); break;
-        case 1: this.xs[r][c][i].on(false); break;
-        case 2: this.xs[r][c][i].on(false); break;
+        case 0: this.xs[r][c][i].on(true);  this.os[r][c][i].on(false); break;
+        case 1: this.xs[r][c][i].on(false); this.os[r][c][i].on(true);  break;
+        default: this.xs[r][c][i].on(false); this.os[r][c][i].on(false); break;
         }
     };
 
+    Board.prototype.check = function(r, c, i, xo) {
+        switch (xo) {
+        case 0: return this.xs[r][c][i].status();
+        case 1: return this.os[r][c][i].status();
+        default: return false;
+        }
+    }
+
     var board = new Board();
     board.mark(1, 1, 4, 0);
+    console.log(board.check(1, 1, 4, 1));
+
+    var requestAnimationFrame = requestAnimationFrame 
+                             || mozRequestAnimationFrame
+                             || msRequestAnimationFrame
+                             || oRequestAnimationFrame;
+
+    function loop() {
+        board.mark(1, 1, 4, 1);
+        console.log(board.check(1, 1, 4, 1));
+        board.mark(1, 1, 4, 0);
+        console.log(board.check(1, 1, 4, 1));
+        requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
 })();
