@@ -173,26 +173,49 @@
 
     
     var board = new Board();
-    board.mark(0, 0, 0, 0);
-    board.mark(0, 0, 4, 0);
-    board.mark(0, 0, 8, 0);
-    board.mark(0, 1, 0, 0);
-    board.mark(0, 1, 4, 0);
-    board.mark(0, 1, 8, 0);
-    board.mark(0, 2, 0, 0);
-    board.mark(0, 2, 4, 0);
-    board.mark(0, 2, 8, 0);
-    console.log(board.whoWinner());
-    /*var requestAnimationFrame = requestAnimationFrame 
+
+    var requestAnimationFrame = requestAnimationFrame 
                              || mozRequestAnimationFrame
                              || msRequestAnimationFrame
-                             || oRequestAnimationFrame;*/
-
-    /*function loop() {
-        board.mark(1, 1, 4, 1);
-        console.log(board.check(1, 1, 4, 1));
+                             || oRequestAnimationFrame;
+    function loop() {
+        console.log(board.whoWinner());
         requestAnimationFrame(loop);
     }
+    requestAnimationFrame(loop);
 
-    requestAnimationFrame(loop);*/
+    var turn = 0;
+    $('#draw-shapes').click(function(e) {
+        var x = e.pageX - $(this).position().left;
+        var y = e.pageY - $(this).position().top;
+
+        var boardLoc = function(x, y) {
+            var row = 0;
+            var col = 0;
+            var iii = 0;
+
+            for (col = 1; col <= 3; col++) { if (x < col * BBOX_W) { break; } }
+            for (row = 1; row <= 3; row++) { if (y < row * BBOX_H) { break; } }
+            
+            col -= 1;
+            row -= 1;
+            x -= col * BBOX_W;
+            y -= row * BBOX_H;
+
+            for (var w = 1; w <= 3; w++) { if (x < w * LBOX_W) { break; } }
+            for (var h = 1; h <= 3; h++) { if (y < h * LBOX_H) { break; } }
+
+            w -= 1;
+            h -= 1;
+            iii = 3 * h + w;
+
+            return { r: row, c: col, i: iii };
+        }
+
+        loc = boardLoc(x, y);
+
+        console.log(loc.r, loc.c, loc.i);
+        board.mark(loc.r, loc.c, loc.i, turn);
+        turn = turn === 0 ? 1 : 0;
+    });
 })();
