@@ -114,22 +114,61 @@
         }
     }
 
+    Board.prototype.whoWinner = function(r, c) {
+        if (r === undefined && c === undefined) {
+            //determine win state of macro board
+        }
+        for (var xo = 0; xo < 2; xo++) {
+            for (var j = 0; j <= 6; j += 3) {   //check across wins 0 1 2, 3 4 5, 6 7 8 
+                if (this.check(r, c, j,     xo) === this.check(r, c, j + 1, xo) 
+                 && this.check(r, c, j + 1, xo) === this.check(r, c, j + 2, xo)
+                 && this.check(r, c, j, xo) === true) 
+                    return xo;
+            }
+            for (var j = 0; j <= 2; j++) {   //check down wins 0 3 6, 1 4 7, 2 5 8
+                if (this.check(r, c, j,     xo) === this.check(r, c, j + 3, xo) 
+                 && this.check(r, c, j + 3, xo) === this.check(r, c, j + 6, xo)
+                 && this.check(r, c, j, xo) === true) 
+                    return xo;
+            }
+
+            //check diag wins 0 4 8, 2 4 6
+            if (this.check(r, c, 0, xo) === this.check(r, c, 4, xo)
+             && this.check(r, c, 4, xo) === this.check(r, c, 8, xo)
+             && this.check(r, c, 0, xo) === true)
+                return xo;
+            else if (this.check(r, c, 2, xo) === this.check(r, c, 4, xo)
+                  && this.check(r, c, 4, xo) === this.check(r, c, 6, xo)
+                  && this.check(r, c, 2, xo) === true)
+                return xo;
+        }
+
+        return 2;
+    }
+
     var board = new Board();
-    board.mark(1, 1, 4, 0);
+    board.mark(0, 0, 0, 0);
+    board.mark(0, 0, 1, 1);
+    board.mark(0, 0, 2, 1);
+    board.mark(0, 0, 3, 0);
+    board.mark(0, 0, 4, 0);
+    board.mark(0, 0, 5, 1);
+    board.mark(0, 0, 6, 1);
+    board.mark(0, 0, 7, 0);
+    board.mark(0, 0, 8, 0);
     console.log(board.check(1, 1, 4, 1));
+    console.log(board.whoWinner(0, 0));
 
     var requestAnimationFrame = requestAnimationFrame 
                              || mozRequestAnimationFrame
                              || msRequestAnimationFrame
                              || oRequestAnimationFrame;
 
-    function loop() {
+    /*function loop() {
         board.mark(1, 1, 4, 1);
-        console.log(board.check(1, 1, 4, 1));
-        board.mark(1, 1, 4, 0);
         console.log(board.check(1, 1, 4, 1));
         requestAnimationFrame(loop);
     }
 
-    requestAnimationFrame(loop);
+    requestAnimationFrame(loop);*/
 })();
