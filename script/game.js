@@ -95,13 +95,15 @@
             }
         }
 
+        this.state = [[]];
+
         two.update();
     }
 
     Board.prototype.mark = function(r, c, i, xon) {
         switch (xon) {
-        case 0: this.xs[r][c][i].on(true);  this.os[r][c][i].on(false); break;
-        case 1: this.xs[r][c][i].on(false); this.os[r][c][i].on(true);  break;
+        case 0: if (!this.check(r, c, i, 1)) this.xs[r][c][i].on(true); break;
+        case 1: if (!this.check(r, c, i, 0)) this.os[r][c][i].on(true); break;
         default: this.xs[r][c][i].on(false); this.os[r][c][i].on(false); break;
         }
     };
@@ -115,8 +117,31 @@
     }
 
     Board.prototype.whoWinner = function(r, c) {
-        if (r === undefined && c === undefined) {
-            //determine win state of macro board
+        if (r === undefined && c === undefined) { //macro board check
+            //check across and down
+            for (var rc = 0; rc <= 2; rc++) {
+                var one = this.whoWinner(rc, 0);
+                var two = this.whoWinner(rc, 1);
+                var tre = this.whoWinner(rc, 2);
+                if (one === two && two === tre) return one;
+
+                one = this.whoWinner(0, rc);
+                two = this.whoWinner(1, rc);
+                tre = this.whoWinner(2, rc);
+                if (one === two && two === tre) return one;
+            }
+
+            var one = this.whoWinner(0, 0);
+            var two = this.whoWinner(1, 1);
+            var tre = this.whoWinner(2, 2);
+            if (one === two && two === tre) return one;
+
+            one = this.whoWinner(0, 2);
+            two = this.whoWinner(1, 1);
+            tre = this.whoWinner(2, 0);
+            if (one === two && two === tre) return one;
+            
+            return 2;
         }
         for (var xo = 0; xo < 2; xo++) {
             for (var j = 0; j <= 6; j += 3) {   //check across wins 0 1 2, 3 4 5, 6 7 8 
@@ -146,23 +171,22 @@
         return 2;
     }
 
+    
     var board = new Board();
     board.mark(0, 0, 0, 0);
-    board.mark(0, 0, 1, 1);
-    board.mark(0, 0, 2, 1);
-    board.mark(0, 0, 3, 0);
     board.mark(0, 0, 4, 0);
-    board.mark(0, 0, 5, 1);
-    board.mark(0, 0, 6, 1);
-    board.mark(0, 0, 7, 0);
     board.mark(0, 0, 8, 0);
-    console.log(board.check(1, 1, 4, 1));
-    console.log(board.whoWinner(0, 0));
-
-    var requestAnimationFrame = requestAnimationFrame 
+    board.mark(0, 1, 0, 0);
+    board.mark(0, 1, 4, 0);
+    board.mark(0, 1, 8, 0);
+    board.mark(0, 2, 0, 0);
+    board.mark(0, 2, 4, 0);
+    board.mark(0, 2, 8, 0);
+    console.log(board.whoWinner());
+    /*var requestAnimationFrame = requestAnimationFrame 
                              || mozRequestAnimationFrame
                              || msRequestAnimationFrame
-                             || oRequestAnimationFrame;
+                             || oRequestAnimationFrame;*/
 
     /*function loop() {
         board.mark(1, 1, 4, 1);
