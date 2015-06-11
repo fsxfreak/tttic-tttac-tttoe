@@ -106,7 +106,7 @@
         case 1: if (!this.check(r, c, i, 0)) this.os[r][c][i].on(true); break;
         default: this.xs[r][c][i].on(false); this.os[r][c][i].on(false); break;
         }
-    };
+    }
 
     Board.prototype.check = function(r, c, i, xo) {
         switch (xo) {
@@ -171,51 +171,72 @@
         return 2;
     }
 
-    
-    var board = new Board();
+    function Game() {
+        this.board = new Board();
+        var self = this;
+        $('#draw-shapes').click(function(e) { self.click(e); });
 
-    var requestAnimationFrame = requestAnimationFrame 
+        requestAnimationFrame = requestAnimationFrame 
                              || mozRequestAnimationFrame
                              || msRequestAnimationFrame
                              || oRequestAnimationFrame;
-    function loop() {
-        console.log(board.whoWinner());
-        requestAnimationFrame(loop);
+
+        requestAnimationFrame(function() { self.loop() });
+
+        this.turn = 0;
+        this.validR = -1;
+        this.validC = -1;
     }
-    requestAnimationFrame(loop);
 
-    var turn = 0;
-    $('#draw-shapes').click(function(e) {
-        var x = e.pageX - $(this).position().left;
-        var y = e.pageY - $(this).position().top;
+    Game.prototype = {
+        click : function(e) {
+            var x = e.pageX - $('#draw-shapes').position().left;
+            var y = e.pageY - $('#draw-shapes').position().top;
 
-        var boardLoc = function(x, y) {
-            var row = 0;
-            var col = 0;
-            var iii = 0;
+            var boardLoc = function(x, y) {
+                var row = 0, col = 0, iii = 0;
 
-            for (col = 1; col <= 3; col++) { if (x < col * BBOX_W) { break; } }
-            for (row = 1; row <= 3; row++) { if (y < row * BBOX_H) { break; } }
-            
-            col -= 1;
-            row -= 1;
-            x -= col * BBOX_W;
-            y -= row * BBOX_H;
+                for (col = 1; col <= 3; col++) { if (x < col * BBOX_W) { break; } }
+                for (row = 1; row <= 3; row++) { if (y < row * BBOX_H) { break; } }
 
-            for (var w = 1; w <= 3; w++) { if (x < w * LBOX_W) { break; } }
-            for (var h = 1; h <= 3; h++) { if (y < h * LBOX_H) { break; } }
+                col -= 1; 
+                row -= 1;
+                x -= col * BBOX_W; 
+                y -= row * BBOX_H;
 
-            w -= 1;
-            h -= 1;
-            iii = 3 * h + w;
+                for (var w = 1; w <= 3; w++) { if (x < w * LBOX_W) { break; } }
+                for (var h = 1; h <= 3; h++) { if (y < h * LBOX_H) { break; } }
 
-            return { r: row, c: col, i: iii };
+                w -= 1;
+                h -= 1;
+                iii = 3 * h + w;
+
+                return { r: row, c: col, i: iii };
+            }
+
+            loc = boardLoc(x, y);
+            if (this.conditions(loc))
+            {
+                this.board.mark(loc.r, loc.c, loc.i, this.turn % 2);
+                this.turn++;
+
+                this.validC = loc.i % 3;
+                this.validR = (loc.i - this.validC) / 3;
+                console.log(this.validC, this.validR);
+            }
+        },
+
+        conditions : function(location) {
+            var validHop = (location.r === this.validR && location.c === this.validC) || this.validR === -1;
+            return validHop;
+        },
+
+        loop : function() {
+            console.log(this.board.whoWinner());
+            requestAnimationFrame(this.loop.bind(this));
         }
+    }
 
-        loc = boardLoc(x, y);
+    var game = new Game();
 
-        console.log(loc.r, loc.c, loc.i);
-        board.mark(loc.r, loc.c, loc.i, turn);
-        turn = turn === 0 ? 1 : 0;
-    });
 })();
