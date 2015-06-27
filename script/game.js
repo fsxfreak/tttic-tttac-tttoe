@@ -176,12 +176,7 @@
         var self = this;
         $('#draw-shapes').click(function(e) { self.click(e); });
 
-        requestAnimationFrame = requestAnimationFrame 
-                             || mozRequestAnimationFrame
-                             || msRequestAnimationFrame
-                             || oRequestAnimationFrame;
-
-        requestAnimationFrame(function() { self.loop() });
+        two.bind("update", this.loop.bind(self));
 
         this.turn = 0;
         this.validR = -1;
@@ -222,7 +217,6 @@
 
                 this.validC = loc.i % 3;
                 this.validR = (loc.i - this.validC) / 3;
-                console.log(this.validC, this.validR);
             }
         },
 
@@ -233,7 +227,6 @@
 
         loop : function() {
             console.log(this.board.whoWinner());
-            requestAnimationFrame(this.loop.bind(this));
         }
     }
 
